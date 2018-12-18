@@ -19,7 +19,7 @@ run = async () => {
     newData = JSON.parse(newData);
 
     let count = 0;
-    let i = 6136;
+    let i = 0;
 
     (async function loop() {
 

@@ -1,13 +1,12 @@
-require('dotenv').config({ path: './../.env' });
 const fs = require('fs');
 const path = require('path');
-const { isEqualObj } = require('./../src/utils');
+const { isEqualObj } = require('./utils');
 const Hubspot = require('hubspot');
 const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
 
 const options = {
-    oldFile: path.join(__dirname, '../data/customers1.json'),
-    newFile: path.join(__dirname, '../data/customers2.json'),
+    oldFile: path.join(__dirname, '../../data/deals-filtered-old.json'),
+    newFile: path.join(__dirname, '../../data/deals-out.json'),
 };
 
 run = async () => {
@@ -18,6 +17,7 @@ run = async () => {
     oldData = JSON.parse(oldData);
     newData = JSON.parse(newData);
 
+    let changedCount = 0;
     let count = 0;
     let i = 0;
 
@@ -27,7 +27,7 @@ run = async () => {
 
         let oldRecord = oldData.find(obj => {
             if (obj && entry) {
-                return obj.customerCode === entry.customerCode;
+                return obj.stock_number === entry.stock_number;
             } else {
                 return false;
             }
@@ -35,22 +35,20 @@ run = async () => {
 
         if (oldRecord) {
             if (!isEqualObj(entry, oldRecord)) {
-                // Update contact
-                let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry));
-                console.log(contact);
-                count++;
-                console.log(i);
+                // Update deal
+                console.log('Deal properties changed: ', entry);
+                changedCount++;
             }
         } else {
-            // Create new
-            let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry));
-            console.log(contact);
+            // Create new deal
+            let deal = await hubspot.deals.create(formatData(entry));
+            console.log(deal);
             count++;
-            console.log(i);
         }
 
         if (i === newData.length - 1) {
-            console.log(count + ' contacts updated or added.');
+            console.log(changedCount + ' deals need manual update.');
+            console.log(count + ' deals added.');
             process.exit(0);
         } else {
             i++;
@@ -62,25 +60,14 @@ run = async () => {
 }
 
 formatData = obj => {
-    let properties = {
-        email: obj.email,
-        phone: obj.phone,
-        mobilephone: obj.mobile,
-        state: obj.state,
-        zip: obj.zip,
-        branch: obj.branch,
-        customer_code: obj.customerCode,
-        address: obj.address,
-        city: obj.city
-    }
     let res = {
         properties: []
     };
-    let keys = Object.keys(properties);
+    let keys = Object.keys(obj);
     for (let i = 0; i < keys.length; i++) {
         res.properties.push({
-            property: keys[i],
-            value: properties[keys[i]],
+            name: keys[i],
+            value: obj[keys[i]],
         });
     }
     return res;

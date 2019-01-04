@@ -47,7 +47,7 @@ module.exports = async function run() {
         let count = 0;
         let i = 0;
 
-        (async function loop() {
+        async function loop() {
 
             let entry = data[i];
 
@@ -80,14 +80,18 @@ module.exports = async function run() {
                 // Write new data to previous import file for next run
                 fs.writeFile(options.previousImport, JSON.stringify(data), err => {
                     if (err) throw new Error(err);
-                    process.exit(0);
+                    return
                 });
             } else {
                 i++;
-                loop();
+                await loop();
             }
 
-        })();
+        };
+
+        await loop();
+
+        return;
     }
 
 }

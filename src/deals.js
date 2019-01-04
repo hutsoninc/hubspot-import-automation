@@ -29,7 +29,7 @@ function formatData(obj) {
     return res;
 }
 
-async function run() {
+module.exports = async function run() {
 
     let input = fs.readFileSync(options.input, 'utf8');
     let previousImport = fs.readFileSync(options.previousImport, 'utf8');
@@ -73,7 +73,7 @@ async function run() {
         let count = 0;
         let i = 0;
 
-        (async function loop() {
+        async function loop() {
 
             let entry = data[i];
 
@@ -109,9 +109,13 @@ async function run() {
                 });
             } else {
                 i++;
-                loop();
+                await loop();
             }
 
-        })();
+        };
+
+        await loop();
+
+        return;
     }
 }

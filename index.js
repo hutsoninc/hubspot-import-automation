@@ -73,49 +73,29 @@ const run = async () => {
                 console.error(err);
             });
     } else {
-		onsole.log('Excel process is running.');
+		console.log('Excel process is running.');
         const userprofile = process.env.USERPROFILE;
 
         // Copy current excel files
-		console.log('Copying excel files...');
+		console.log('Copying excel files from query...');
         await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/customers.csv`, `${userprofile}/projects/data/customers.csv`);
-        await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`, `${userprofile}/projects/data/deals.csv`);
+        // await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`, `${userprofile}/projects/data/deals.csv`);
 
-        // Clean and validate customer data
-		console.log('Running customer data scrubber...');
-        let scrubberLogsCustomers = await runNode(`${userprofile}/projects/data-scrubber/scripts/customers.js`);
-        console.log(scrubberLogsCustomers);
+        // Import customers
+		console.log('Running customers import...');
+        await runNode(`${userprofile}/projects/data-scrubber/scripts/customers.js`);
         
-        // Clean and validate deals data
-		console.log('Running deals data scrubber...');
-        let scrubberLogsDeals = await runNode(`${userprofile}/projects/data-scrubber/scripts/deals.js`);
-		console.log(scrubberLogsDeals);
-        
-        // Filter deals data
-		console.log('Running deals data filter...');
-        let filterLogsDeals = await runNode(`${userprofile}/projects/data-scrubber/scripts/filter-deals.js`);
-		console.log(filterLogsDeals);
+        // Import deals
+		// console.log('Running deals import...');
+        // await runNode(`${userprofile}/projects/data-scrubber/scripts/deals.js`);
 
-        // Upload customers to HubSpot
-		console.log('Uploading customers to HubSpot...');
-        let importLogsCustomers = await runNode(`${userprofile}/projects/hubspot-import-automation/src/customers.js`);
-		console.log(importLogsCustomers);
-
-        // Upload deals to HubSpot
-		console.log('Uploading deals to HubSpot...');
-        let importLogsDeals = await runNode(`${userprofile}/projects/hubspot-import-automation/src/deals.js`);
-		console.log(importLogsDeals);
-
-        // Copy new data for next comparison
-		console.log('Copy files for next run...');
-        await fs.move(`${userprofile}/projects/data/customers-old.json`, `${userprofile}/projects/data/backups/customers-old-${Date.now()}.json`);
-        await fs.move(`${userprofile}/projects/data/customers-out.json`, `${userprofile}/projects/data/customers-old.json`);
-        await fs.move(`${userprofile}/projects/data/deals-old.json`, `${userprofile}/projects/data/backups/deals-old-${Date.now()}.json`);
-        await fs.move(`${userprofile}/projects/data/deals-out.json`, `${userprofile}/projects/data/deals-old.json`);
+        // Create backups
+		console.log('Creating backups...');
+        await fs.copyFile(`${userprofile}/projects/data/customers-out.json`, `${userprofile}/projects/data/backups/customers-out-${Date.now()}.json`);
+        // await fs.copyFile(`${userprofile}/projects/data/deals-out.json`, `${userprofile}/projects/data/backups/deals-out-${Date.now()}.json`);
     }
 
 };
-
 
 run()
     .then(() => {
@@ -124,4 +104,5 @@ run()
     })
     .catch(err => {
         console.error(err);
+        process.exit(1);
     });

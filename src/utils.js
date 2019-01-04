@@ -1,4 +1,4 @@
-isEqualObj = (a, b) => {
+function isEqualObj(a, b) {
     // Create arrays of property names
     let aProps = Object.getOwnPropertyNames(a);
     let bProps = Object.getOwnPropertyNames(b);
@@ -21,6 +21,13 @@ isEqualObj = (a, b) => {
     return true;
 }
 
+function toTitleCase(str) {
+    arr = str.toLowerCase().split(' ');
+    arr = arr.map(s => s.charAt(0).toUpperCase() + s.slice(1));
+    return arr.join(' ');
+}
+
 module.exports = {
     isEqualObj,
+    toTitleCase
 }

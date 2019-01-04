@@ -7,13 +7,10 @@ const scrub = require('./deals-scrubber');
 const fetchHubspotDeals = require('./fetch-hubspot-deals');
 const fetchHubspotCustomers = require('./fetch-hubspot-customers');
 const csv = require('csvtojson');
-const Bottleneck = require('bottleneck');
 const Promise = require('bluebird');
+const pLimit = require('p-limit');
 
-const limiter = new Bottleneck({
-    maxConcurrent: 5,
-    minTime: 100,
-});
+const limit = pLimit(5);
 
 const options = {
     input: path.join(__dirname, '../../data/deals.csv'), // Data from query
@@ -98,7 +95,7 @@ module.exports = async function run() {
                 }
             } else {
                 // Create new
-                return limiter.schedule(() => hubspot.deals.create(formatData(entry)))
+                return limit(() => hubspot.deals.create(formatData(entry)))
                     .then(deal => {
                         count++;
                         console.log(deal);
@@ -107,7 +104,7 @@ module.exports = async function run() {
                         console.error(err);
                     });
             }
-        })).then(_ => {
+        })).then(() => {
             console.log(count + ' deals updated or added.');
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {

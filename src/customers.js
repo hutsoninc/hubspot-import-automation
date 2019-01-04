@@ -5,13 +5,10 @@ const Hubspot = require('hubspot');
 const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
 const scrub = require('./customers-scrubber');
 const csv = require('csvtojson');
-const Bottleneck = require('bottleneck');
 const Promise = require('bluebird');
+const pLimit = require('p-limit');
 
-const limiter = new Bottleneck({
-    maxConcurrent: 5,
-    minTime: 100,
-});
+const limit = pLimit(5);
 
 const options = {
     input: path.join(__dirname, '../../data/customers.csv'), // Data from query
@@ -67,7 +64,7 @@ module.exports = async function run() {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
                     // Update contact
-                    return limiter.schedule(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                    return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
                         .then(contact => {
                             count++;
                             console.log(contact);
@@ -78,7 +75,7 @@ module.exports = async function run() {
                 }
             } else {
                 // Create new
-                return limiter.schedule(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
                     .then(contact => {
                         count++;
                         console.log(contact);
@@ -87,7 +84,7 @@ module.exports = async function run() {
                         console.error(err);
                     });
             }
-        })).then(_ => {
+        })).then(() => {
             console.log(count + ' contacts updated or added.');
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {

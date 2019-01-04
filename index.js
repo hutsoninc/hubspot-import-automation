@@ -3,6 +3,7 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
+const path = require('path');
 
 const isRunning = async query => {
     return new Promise(function (resolve, reject) {
@@ -83,11 +84,11 @@ const run = async () => {
 
         // Import customers
 		console.log('Running customers import...');
-        await runNode(`${userprofile}/projects/data-scrubber/scripts/customers.js`);
+        await runNode(path.join(__dirname, '/src/customers.js'));
         
         // Import deals
 		// console.log('Running deals import...');
-        // await runNode(`${userprofile}/projects/data-scrubber/scripts/deals.js`);
+        // await runNode(path.join(__dirname, '/src/deals.js'));
 
         // Create backups
 		console.log('Creating backups...');

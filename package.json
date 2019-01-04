@@ -21,6 +21,8 @@
   "license": "MIT",
   "dependencies": {
     "@hutsoninc/data-scrubber": "^1.0.1",
+    "bluebird": "^3.5.3",
+    "bottleneck": "^2.15.0",
     "csvtojson": "^2.0.8",
     "dotenv": "^6.2.0",
     "fs-extra": "^7.0.1",

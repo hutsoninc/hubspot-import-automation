@@ -5,6 +5,13 @@ const Hubspot = require('hubspot');
 const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
 const scrub = require('./customers-scrubber');
 const csv = require('csvtojson');
+const Bottleneck = require('bottleneck');
+const Promise = require('bluebird');
+
+const limiter = new Bottleneck({
+    maxConcurrent: 5,
+    minTime: 100,
+});
 
 const options = {
     input: path.join(__dirname, '../../data/customers.csv'), // Data from query
@@ -45,12 +52,8 @@ module.exports = async function run() {
         console.log('Updating customers in HubSpot...');
 
         let count = 0;
-        let i = 0;
 
-        async function loop() {
-
-            let entry = data[i];
-
+        return await Promise.all(data.map(entry => {
             // Find customer in previous import
             let record = previousImport.find(obj => {
                 if (obj && entry) {
@@ -64,40 +67,34 @@ module.exports = async function run() {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
                     // Update contact
-                    let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
+                    return limiter.schedule(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                        .then(contact => {
+                            count++;
+                            console.log(contact);
+                        })
                         .catch(err => {
                             console.error(err);
-                        });;
-                    console.log(count + ': ' + JSON.stringify(contact));
-                    count++;
+                        });
                 }
             } else {
                 // Create new
-                let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
+                return limiter.schedule(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                    .then(contact => {
+                        count++;
+                        console.log(contact);
+                    })
                     .catch(err => {
                         console.error(err);
                     });
-                console.log(count + ': ' + JSON.stringify(contact));
-                count++;
             }
+        })).then(_ => {
+            console.log(count + ' contacts updated or added.');
+            // Write new data to previous import file for next run
+            fs.writeFile(options.previousImport, JSON.stringify(data), err => {
+                if (err) throw new Error(err);
+                return;
+            });
+        });
 
-            if (i === data.length - 1) {
-                console.log(count + ' contacts updated or added.');
-                // Write new data to previous import file for next run
-                fs.writeFile(options.previousImport, JSON.stringify(data), err => {
-                    if (err) throw new Error(err);
-                    return;
-                });
-            } else {
-                i++;
-                await loop();
-            }
-
-        };
-
-        await loop();
-
-        return;
     }
-
 }

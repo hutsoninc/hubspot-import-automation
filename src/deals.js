@@ -7,6 +7,13 @@ const scrub = require('./deals-scrubber');
 const fetchHubspotDeals = require('./fetch-hubspot-deals');
 const fetchHubspotCustomers = require('./fetch-hubspot-customers');
 const csv = require('csvtojson');
+const Bottleneck = require('bottleneck');
+const Promise = require('bluebird');
+
+const limiter = new Bottleneck({
+    maxConcurrent: 5,
+    minTime: 100,
+});
 
 const options = {
     input: path.join(__dirname, '../../data/deals.csv'), // Data from query
@@ -71,12 +78,8 @@ module.exports = async function run() {
         // - Update deals with changed properties from equip
 
         let count = 0;
-        let i = 0;
 
-        async function loop() {
-
-            let entry = data[i];
-
+        return await Promise.all(data.map(entry => {
             // Find deal in previous import
             let record = previousImport.find(obj => {
                 if (obj && entry) {
@@ -89,33 +92,29 @@ module.exports = async function run() {
             if (record) {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
-                    // Update deal...
-                    console.log('Deal properties changed: ', entry);
+                    // Update deal
+                    console.log('Deal properties changed: ', JSON.stringify(entry));
                     count++;
                 }
             } else {
                 // Create new
-                let deal = await hubspot.deals.create(formatData(entry));
-                console.log(deal);
-                count++;
+                return limiter.schedule(() => hubspot.deals.create(formatData(entry)))
+                    .then(deal => {
+                        count++;
+                        console.log(deal);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
             }
+        })).then(_ => {
+            console.log(count + ' deals updated or added.');
+            // Write new data to previous import file for next run
+            fs.writeFile(options.previousImport, JSON.stringify(data), err => {
+                if (err) throw new Error(err);
+                return;
+            });
+        });
 
-            if (i === data.length - 1) {
-                console.log(count + ' deals updated or added.');
-                // Write new data to previous import file for next run
-                fs.writeFile(options.previousImport, JSON.stringify(data), err => {
-                    if (err) throw new Error(err);
-                    return;
-                });
-            } else {
-                i++;
-                await loop();
-            }
-
-        };
-
-        await loop();
-
-        return;
     }
 }

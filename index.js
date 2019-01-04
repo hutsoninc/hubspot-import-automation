@@ -4,6 +4,8 @@ const nodemailer = require('nodemailer');
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
 const path = require('path');
+const handleCustomers = require('./src/customers');
+const handleDeals = require('./src/deals');
 
 const isRunning = async query => {
     return new Promise(function (resolve, reject) {
@@ -56,15 +58,15 @@ const sendEmailAlert = async () => {
 
 const run = async () => {
 
-	console.log('Checking for excel process...');
+    console.log('Checking for excel process...');
     let running = await isRunning('wfica32.exe')
         .catch(err => {
             console.error(err);
         });
 
     if (!running) {
-		console.log('Excel process is not running.');
-		console.log('Sending email alert...');
+        console.log('Excel process is not running.');
+        console.log('Sending email alert...');
         await sendEmailAlert()
             .then(() => {
                 console.log('Sent email alert');
@@ -74,24 +76,32 @@ const run = async () => {
                 console.error(err);
             });
     } else {
-		console.log('Excel process is running.');
+        console.log('Excel process is running.');
         const userprofile = process.env.USERPROFILE;
 
         // Copy current excel files
-		console.log('Copying excel files from query...');
+        console.log('Copying excel files from query...');
         await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/customers.csv`, `${userprofile}/projects/data/customers.csv`);
         // await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`, `${userprofile}/projects/data/deals.csv`);
 
         // Import customers
-		console.log('Running customers import...');
-        await runNode(path.join(__dirname, '/src/customers.js'));
-        
+        console.log('Running customers import...');
+        await handleCustomers()
+            .catch(err => {
+                console.error(err);
+                process.exit(1);
+            });
+
         // Import deals
-		// console.log('Running deals import...');
-        // await runNode(path.join(__dirname, '/src/deals.js'));
+        // console.log('Running deals import...');
+        // await handleDeals()
+        //     .catch(err => {
+        //         console.error(err);
+        //         process.exit(1);
+        //     });
 
         // Create backups
-		console.log('Creating backups...');
+        console.log('Creating backups...');
         await fs.copyFile(`${userprofile}/projects/data/customers-out.json`, `${userprofile}/projects/data/backups/customers-out-${Date.now()}.json`);
         // await fs.copyFile(`${userprofile}/projects/data/deals-out.json`, `${userprofile}/projects/data/backups/deals-out-${Date.now()}.json`);
     }
@@ -100,7 +110,7 @@ const run = async () => {
 
 run()
     .then(() => {
-		console.log('Finished!');
+        console.log('Finished!');
         process.exit(0);
     })
     .catch(err => {

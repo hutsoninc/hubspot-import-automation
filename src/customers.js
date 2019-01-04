@@ -26,7 +26,7 @@ function formatData(obj) {
     return res;
 }
 
-async function run() {
+module.exports = async function run() {
 
     let input = fs.readFileSync(options.input, 'utf8');
     let previousImport = fs.readFileSync(options.previousImport, 'utf8');
@@ -91,9 +91,3 @@ async function run() {
     }
 
 }
-
-run()
-    .catch(err => {
-        console.error(err);
-        process.exit(1);
-    });

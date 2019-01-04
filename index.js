@@ -82,7 +82,7 @@ const run = async () => {
         // Copy current excel files
         console.log('Copying excel files from query...');
         await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/customers.csv`, `${userprofile}/projects/data/customers.csv`);
-        // await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`, `${userprofile}/projects/data/deals.csv`);
+        await fs.copyFile(`${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`, `${userprofile}/projects/data/deals.csv`);
 
         // Import customers
         console.log('Running customers import...');
@@ -93,17 +93,17 @@ const run = async () => {
             });
 
         // Import deals
-        // console.log('Running deals import...');
-        // await handleDeals()
-        //     .catch(err => {
-        //         console.error(err);
-        //         process.exit(1);
-        //     });
+        console.log('Running deals import...');
+        await handleDeals()
+            .catch(err => {
+                console.error(err);
+                process.exit(1);
+            });
 
         // Create backups
         console.log('Creating backups...');
         await fs.copyFile(`${userprofile}/projects/data/customers-out.json`, `${userprofile}/projects/data/backups/customers-out-${Date.now()}.json`);
-        // await fs.copyFile(`${userprofile}/projects/data/deals-out.json`, `${userprofile}/projects/data/backups/deals-out-${Date.now()}.json`);
+        await fs.copyFile(`${userprofile}/projects/data/deals-out.json`, `${userprofile}/projects/data/backups/deals-out-${Date.now()}.json`);
     }
 
 };

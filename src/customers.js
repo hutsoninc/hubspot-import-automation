@@ -64,14 +64,20 @@ module.exports = async function run() {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
                     // Update contact
-                    let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry));
-                    console.log(contact);
+                    let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
+                        .catch(err => {
+                            console.error(err);
+                        });;
+                    console.log(count + ': ' + contact);
                     count++;
                 }
             } else {
                 // Create new
-                let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry));
-                console.log(contact);
+                let contact = await hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
+                    .catch(err => {
+                        console.error(err);
+                    });
+                console.log(count + ': ' + contact);
                 count++;
             }
 

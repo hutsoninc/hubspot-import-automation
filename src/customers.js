@@ -68,7 +68,7 @@ module.exports = async function run() {
                         .catch(err => {
                             console.error(err);
                         });;
-                    console.log(count + ': ' + contact);
+                    console.log(count + ': ' + JSON.stringify(contact));
                     count++;
                 }
             } else {
@@ -77,7 +77,7 @@ module.exports = async function run() {
                     .catch(err => {
                         console.error(err);
                     });
-                console.log(count + ': ' + contact);
+                console.log(count + ': ' + JSON.stringify(contact));
                 count++;
             }
 

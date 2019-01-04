@@ -61,8 +61,8 @@ module.exports = async function run() {
     if (options.upload) {
         console.log('Updating deals in HubSpot...');
 
-        let hubspotDeals = await fetchHubspotDeals();
-        let hubspotCustomers = await fetchHubspotCustomers();
+        // let hubspotDeals = await fetchHubspotDeals();
+        // let hubspotCustomers = await fetchHubspotCustomers();
 
         // TODO
         // - Associate HS customers with deals
@@ -100,12 +100,12 @@ module.exports = async function run() {
                 count++;
             }
 
-            if (i === previousImport.length - 1) {
+            if (i === data.length - 1) {
                 console.log(count + ' deals updated or added.');
                 // Write new data to previous import file for next run
                 fs.writeFile(options.previousImport, JSON.stringify(data), err => {
                     if (err) throw new Error(err);
-                    process.exit(0);
+                    return;
                 });
             } else {
                 i++;

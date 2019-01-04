@@ -81,12 +81,12 @@ module.exports = async function run() {
                 count++;
             }
 
-            if (i === previousImport.length - 1) {
+            if (i === data.length - 1) {
                 console.log(count + ' contacts updated or added.');
                 // Write new data to previous import file for next run
                 fs.writeFile(options.previousImport, JSON.stringify(data), err => {
                     if (err) throw new Error(err);
-                    return
+                    return;
                 });
             } else {
                 i++;

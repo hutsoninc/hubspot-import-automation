@@ -50,7 +50,7 @@ module.exports = async function run() {
 
         let count = 0;
 
-        data = data.map(entry => {
+        let promises = data.map(entry => {
             // Find customer in previous import
             let record = previousImport.find(obj => {
                 if (obj && entry) {
@@ -87,7 +87,7 @@ module.exports = async function run() {
             }
         }).filter(obj => obj);
 
-        return await Promise.all(data).then(() => {
+        return await Promise.all(promises).then(() => {
             console.log(count + ' contacts updated or added.');
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {

@@ -46,7 +46,7 @@ module.exports = async function run() {
     data = scrub(data);
 
     // Filter out deals without a customer record
-    customersData = JSON.stringify(options.customersData);
+    customersData = JSON.parse(customersData);
     customersData = customersData.map(customer => customer.customerCode.toUpperCase());
 
     console.log('Filtering ' + data.length + ' records');

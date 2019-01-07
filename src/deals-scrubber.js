@@ -12,12 +12,12 @@ module.exports = function scrub(data) {
         let out = {};
 
         // Email
-        out.email = validateEmail(obj.contact_email_address, 'email');
+        out.email = validateEmail(obj.contact_email_address);
         delete obj.contact_email_address;
 
         if (obj.contact_country === "US") {
             // Phone Number
-            out.phone = validatePhone(obj.contact_bus_phone, 'phone');
+            out.phone = validatePhone(obj.contact_bus_phone);
         } else {
             out.phone = '';
         }
@@ -25,19 +25,19 @@ module.exports = function scrub(data) {
         delete obj.contact_country;
 
         // Mobile Phone Number
-        out.mobilephone = validatePhone(obj.contact_mob_phone, 'mobile');
+        out.mobilephone = validatePhone(obj.contact_mob_phone);
         delete obj.contact_mob_phone;
 
         // State
-        out.state = validateState(obj.contact_state, 'state');
+        out.state = validateState(obj.contact_state);
         delete obj.contact_state;
 
         // Zip
-        out.zip = validateZip(obj.contact_pcode, 'zip');
+        out.zip = validateZip(obj.contact_pcode);
         delete obj.contact_pcode;
 
         // Hutson Branch
-        out.branch = validateHutsonBranch(obj.vhstock_br, 'hutson-branch');
+        out.branch = validateHutsonBranch(obj.vhstock_br);
         delete obj.vhstock_br;
 
         // First Name
@@ -97,7 +97,7 @@ module.exports = function scrub(data) {
         delete obj.vhstock_salesdate;
 
         // Company Name
-        out.companyName = String(obj.contact_company_name).trim();
+        // out.company_name = String(obj.contact_company_name).trim();
         delete obj.contact_company_name;
 
         // Sales Value

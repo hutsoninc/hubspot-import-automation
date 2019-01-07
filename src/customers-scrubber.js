@@ -11,7 +11,7 @@ module.exports = function scrub(data) {
         let out = {};
 
         // Email
-        out.email = validateEmail(obj.Email, 'email');
+        out.email = validateEmail(obj.Email);
         delete obj.Email;
 
         // If no email, remove customer
@@ -20,27 +20,27 @@ module.exports = function scrub(data) {
         }
 
         // Phone Number
-        out.phone = validatePhone(obj.HomePhone, 'phone');
+        out.phone = validatePhone(obj.HomePhone);
         delete obj.HomePhone;
 
         // Business Phone Number
-        out.businessPhone = validatePhone(obj.BusinessPhone, 'business-phone');
+        out.businessphone = validatePhone(obj.BusinessPhone);
         delete obj.BusinessPhone;
 
         // Mobile Phone Number
-        out.mobilephone = validatePhone(obj.MobilePhone, 'mobile');
+        out.mobilephone = validatePhone(obj.MobilePhone);
         delete obj.MobilePhone;
 
         // State
-        out.state = validateState(obj.State, 'state');
+        out.state = validateState(obj.State);
         delete obj.State;
 
         // Zip
-        out.zip = validateZip(obj.ZIP, 'zip');
+        out.zip = validateZip(obj.ZIP);
         delete obj.ZIP;
 
         // Hutson Branch
-        out.branch = validateHutsonBranch(obj.Territory, 'hutson-branch');
+        out.branch = validateHutsonBranch(obj.Territory);
         delete obj.Territory;
 
         // Customer Code
@@ -65,10 +65,10 @@ module.exports = function scrub(data) {
 
         obj = Object.assign({}, row);
 
-        if (obj.businessPhone) {
-            obj.phone = obj.businessPhone;
+        if (obj.businessphone) {
+            obj.phone = obj.businessphone;
         }
-        delete obj.businessPhone;
+        delete obj.businessphone;
 
         return obj;
     });

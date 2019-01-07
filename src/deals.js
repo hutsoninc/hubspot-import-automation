@@ -47,12 +47,12 @@ module.exports = async function run() {
 
     // Filter out deals without a customer record
     customersData = JSON.parse(customersData);
-    customersData = customersData.map(customer => customer.customerCode.toUpperCase());
+    customersData = customersData.map(customer => customer.customer_code.toUpperCase());
 
     console.log('Filtering ' + data.length + ' records');
 
     data = data.filter(obj => {
-        if (obj.customerCode && (customersData.indexOf(obj.customerCode.toUpperCase()) >= 0)) {
+        if (obj.customer_code && (customersData.indexOf(obj.customer_code.toUpperCase()) >= 0)) {
             return true;
         }
         return false;

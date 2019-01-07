@@ -49,7 +49,7 @@ module.exports = async function run() {
     customersData = JSON.parse(customersData);
     customersData = customersData.map(customer => customer.customer_code.toUpperCase());
 
-    console.log('Filtering ' + data.length + ' records');
+    console.log(`Filtering ${data.length} records`);
 
     data = data.filter(obj => {
         if (obj.customer_code && (customersData.indexOf(obj.customer_code.toUpperCase()) >= 0)) {
@@ -63,7 +63,7 @@ module.exports = async function run() {
 
     // Upload data to HubSpot
     if (options.upload) {
-        console.log('Updating deals in HubSpot...');
+        console.log(`Updating ${data.length} deals in HubSpot...`);
 
         // let hubspotDeals = await fetchHubspotDeals();
         // let hubspotCustomers = await fetchHubspotCustomers();
@@ -90,7 +90,7 @@ module.exports = async function run() {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
                     // Update deal
-                    console.log('Deal properties changed: ', JSON.stringify(entry));
+                    console.log(`Deal properties changed: ${entry.dealname}`);
                     count++;
                     return;
                 }
@@ -109,7 +109,7 @@ module.exports = async function run() {
         }).filter(obj => obj);
 
         return await Promise.all(promises).then(() => {
-            console.log(count + ' deals updated or added.');
+            console.log(`${count} deals updated or added.`);
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {
                 if (err) throw new Error(err);

@@ -20,7 +20,6 @@ module.exports = function scrub(data) {
             out.phone = validatePhone(obj.contact_bus_phone, 'phone');
         } else {
             out.phone = '';
-            updateCount('err', 'international-phone');
         }
         delete obj.contact_bus_phone;
         delete obj.contact_country;

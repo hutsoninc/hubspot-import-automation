@@ -76,7 +76,7 @@ module.exports = async function run() {
 
         let count = 0;
 
-        return await Promise.all(data.map(entry => {
+        data = data.map(entry => {
             // Find deal in previous import
             let record = previousImport.find(obj => {
                 if (obj && entry) {
@@ -92,19 +92,23 @@ module.exports = async function run() {
                     // Update deal
                     console.log('Deal properties changed: ', JSON.stringify(entry));
                     count++;
+                    return;
                 }
+                return;
             } else {
                 // Create new
-                return limit(() => hubspot.deals.create(formatData(entry)))
+                return limit(() => hubspot.deals.create(formatData(entry))
                     .then(deal => {
                         count++;
                         console.log(deal);
                     })
                     .catch(err => {
                         console.error(err);
-                    });
+                    }));
             }
-        })).then(() => {
+        }).filter(obj => obj);
+
+        return await Promise.all(data).then(() => {
             console.log(count + ' deals updated or added.');
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {

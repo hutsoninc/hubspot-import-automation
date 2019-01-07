@@ -50,7 +50,7 @@ module.exports = async function run() {
 
         let count = 0;
 
-        return await Promise.all(data.map(entry => {
+        data = data.map(entry => {
             // Find customer in previous import
             let record = previousImport.find(obj => {
                 if (obj && entry) {
@@ -64,27 +64,30 @@ module.exports = async function run() {
                 // Check if record has changed
                 if (!isEqualObj(entry, record)) {
                     // Update contact
-                    return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                    return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
                         .then(contact => {
                             count++;
                             console.log(contact);
                         })
                         .catch(err => {
                             console.error(err);
-                        });
+                        }));
                 }
+                return;
             } else {
                 // Create new
-                return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry)))
+                return limit(() => hubspot.contacts.createOrUpdate(entry.email, formatData(entry))
                     .then(contact => {
                         count++;
                         console.log(contact);
                     })
                     .catch(err => {
                         console.error(err);
-                    });
+                    }));
             }
-        })).then(() => {
+        }).filter(obj => obj);
+
+        return await Promise.all(data).then(() => {
             console.log(count + ' contacts updated or added.');
             // Write new data to previous import file for next run
             fs.writeFile(options.previousImport, JSON.stringify(data), err => {

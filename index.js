@@ -159,7 +159,7 @@ const run = async options => {
     previousDealsImport = JSON.parse(previousDealsImport);
     dealsData = dealsData.map(deal => {
         let record = previousDealsImport.find(obj => {
-            if (obj && entry) {
+            if (obj && deal) {
                 return obj.stock_number === deal.stock_number;
             } else {
                 return false;

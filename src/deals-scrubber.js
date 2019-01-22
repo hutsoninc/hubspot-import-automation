@@ -3,7 +3,7 @@ const { toTitleCase } = require('./utils');
 
 module.exports = function scrub(data) {
 
-    console.log('Scrubbing ' + data.length + ' records');
+    console.log('Scrubbing ' + data.length + ' records...');
 
     data = data.map(row => {
 

@@ -2,7 +2,7 @@ const { validatePhone, validateEmail, validateZip, validateState, validateHutson
 
 module.exports = function scrub(data) {
 
-    console.log('Scrubbing ' + data.length + ' records');
+    console.log('Scrubbing ' + data.length + ' records...');
 
     data = data.map(row => {
 

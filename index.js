@@ -135,7 +135,7 @@ const run = async options => {
         'utf8'
     );
     previousCustomersImport = JSON.parse(previousCustomersImport);
-    customersData = customersData
+    let newCustomersData = customersData
         .map(customer => {
             // Find customer in previous import
             let record = previousCustomersImport.find(obj => {
@@ -153,7 +153,7 @@ const run = async options => {
         })
         .filter(obj => obj !== null);
 
-    console.log(customersData.length + ' customers.');
+    console.log(newCustomersData.length + ' customers.');
 
     // Filter out deals from previous import
     console.log('Filtering deals from previous import...');
@@ -183,7 +183,7 @@ const run = async options => {
 
     // Merge data for upload
     console.log('Merging data for upload...');
-    customersData = customersData.map(customer => {
+    newCustomersData = newCustomersData.map(customer => {
         let out = {
             email: customer.email,
             phone: customer.phone,
@@ -251,35 +251,38 @@ const run = async options => {
                 customer.customer_code.toUpperCase() ===
                 deal.customer_code.toUpperCase()
         );
-
-        return hubspot.contacts
-            .getByEmail(customer.email)
-            .then(contact => {
-                if (contact && contact.vid) {
-                    return {
-                        pipeline: deal.pipeline,
-                        dealstage: deal.dealstage,
-                        dealname: deal.dealname,
-                        amount: deal.amount,
-                        closedate: deal.closedate,
-                        vin_number: deal.vin_number,
-                        stock_number: deal.stock_number,
-                        equipment_make: deal.equipment_make,
-                        equipment_model: deal.equipment_model,
-                        equipment_category: deal.equipment_category,
-                        equipment_subcategory: deal.equipment_subcategory,
-                        new_or_used: deal.new_or_used,
-                        year_manufactured: deal.year_manufactured,
-                        associations: {
-                            associatedVids: [contact.vid],
-                        },
-                    };
-                }
-                return null;
-            })
-            .catch(err => {
-                console.error(err);
-            });
+        if (customer.email) {
+            return hubspot.contacts
+                .getByEmail(customer.email)
+                .then(contact => {
+                    if (contact && contact.vid) {
+                        return {
+                            pipeline: deal.pipeline,
+                            dealstage: deal.dealstage,
+                            dealname: deal.dealname,
+                            amount: deal.amount,
+                            closedate: deal.closedate,
+                            vin_number: deal.vin_number,
+                            stock_number: deal.stock_number,
+                            equipment_make: deal.equipment_make,
+                            equipment_model: deal.equipment_model,
+                            equipment_category: deal.equipment_category,
+                            equipment_subcategory: deal.equipment_subcategory,
+                            new_or_used: deal.new_or_used,
+                            year_manufactured: deal.year_manufactured,
+                            associations: {
+                                associatedVids: [contact.vid],
+                            },
+                        };
+                    }
+                    return null;
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        } else {
+            return null;
+        }
     });
 
     dealsData = await Promise.all(dealsPromises);
@@ -288,7 +291,7 @@ const run = async options => {
 
     // Upload data to HubSpot
     console.log('Uploading data to HubSpot...');
-    await uploadCustomers(customersData, options);
+    await uploadCustomers(newCustomersData, options);
     await uploadDeals(dealsData, options);
 
     // Create backups

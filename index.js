@@ -158,20 +158,22 @@ const run = async options => {
         'utf8'
     );
     previousDealsImport = JSON.parse(previousDealsImport);
-    dealsData = dealsData.map(deal => {
-        let record = previousDealsImport.find(obj => {
-            if (obj && deal) {
-                return obj.stock_number === deal.stock_number;
-            } else {
-                return false;
+    dealsData = dealsData
+        .map(deal => {
+            let record = previousDealsImport.find(obj => {
+                if (obj && deal) {
+                    return obj.stock_number === deal.stock_number;
+                } else {
+                    return false;
+                }
+            });
+            if (record) {
+                // Deal found in previous import
+                return null;
             }
-        });
-        if (record) {
-            // Deal found in previous import
-            return null;
-        }
-        return deal;
-    });
+            return deal;
+        })
+        .filter(obj => obj !== null);
 
     // Merge data for upload
     console.log('Merging data for upload...');

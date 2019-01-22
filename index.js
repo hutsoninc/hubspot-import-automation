@@ -48,17 +48,17 @@ const run = async options => {
     options = Object.assign(
         {
             customers: {
-                input: path.join(__dirname, '../../data/customers.csv'), // Data from query
+                input: path.join(__dirname, '../data/customers.csv'), // Data from query
                 previousImport: path.join(
                     __dirname,
-                    '../../data/customers-out.json'
+                    '../data/customers-out.json'
                 ), // Previous import data
             },
             deals: {
-                input: path.join(__dirname, '../../data/deals.csv'), // Data from query
+                input: path.join(__dirname, '../data/deals.csv'), // Data from query
                 previousImport: path.join(
                     __dirname,
-                    '../../data/deals-out.json'
+                    '../data/deals-out.json'
                 ), // Previous import data
             },
             upload: true, // Should the new data be uploaded to HubSpot

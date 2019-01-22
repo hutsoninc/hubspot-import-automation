@@ -153,6 +153,8 @@ const run = async options => {
         })
         .filter(obj => obj !== null);
 
+    console.log(customersData.length + ' customers.');
+
     // Filter out deals from previous import
     console.log('Filtering deals from previous import...');
     let previousDealsImport = fs.readFileSync(
@@ -176,6 +178,8 @@ const run = async options => {
             return deal;
         })
         .filter(obj => obj !== null);
+
+    console.log(dealsData.length + ' deals.');
 
     // Merge data for upload
     console.log('Merging data for upload...');
@@ -238,7 +242,9 @@ const run = async options => {
     });
 
     // Get customer VIDs for deals associations
-    console.log('Fetching customer VIDs for deal associations...');
+    console.log(
+        `Fetching customer VIDs for ${dealsData.length} deal associations...`
+    );
     let dealsPromises = dealsData.map(deal => {
         let customer = customersData.find(
             customer =>
@@ -277,6 +283,8 @@ const run = async options => {
     });
 
     dealsData = await Promise.all(dealsPromises);
+
+    dealsData = dealsData.filter(obj => obj !== null);
 
     // Upload data to HubSpot
     console.log('Uploading data to HubSpot...');

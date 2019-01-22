@@ -147,6 +147,7 @@ const run = async options => {
                 // Customer found in previous import and data hasn't changed
                 return null;
             }
+            return customer;
         })
         .filter(obj => obj !== null);
 
@@ -169,6 +170,7 @@ const run = async options => {
             // Deal found in previous import
             return null;
         }
+        return deal;
     });
 
     // Merge data for upload

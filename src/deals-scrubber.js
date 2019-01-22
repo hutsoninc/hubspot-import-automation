@@ -97,7 +97,7 @@ module.exports = function scrub(data) {
         delete obj.vhstock_salesdate;
 
         // Company Name
-        // out.company_name = String(obj.contact_company_name).trim();
+        out.company_name = String(obj.contact_company_name).trim();
         delete obj.contact_company_name;
 
         // Sales Value
@@ -105,7 +105,7 @@ module.exports = function scrub(data) {
         delete vhstock_sales_value
 
         out.dealstage = 'closedwon';
-        out.pipeline = 'Sales Pipeline';
+        out.pipeline = 'default';
 
         return out;
 

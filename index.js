@@ -56,10 +56,7 @@ const run = async options => {
             },
             deals: {
                 input: path.join(__dirname, '../data/deals.csv'), // Data from query
-                previousImport: path.join(
-                    __dirname,
-                    '../data/deals-out.json'
-                ), // Previous import data
+                previousImport: path.join(__dirname, '../data/deals-out.json'), // Previous import data
             },
             upload: true, // Should the new data be uploaded to HubSpot
             limit: 5, // Number of concurrent executions
@@ -101,7 +98,7 @@ const run = async options => {
     );
 
     // Import customers
-    console.log('Running customers import...');
+    console.log('Importing customers...');
     let input = fs.readFileSync(options.customers.input, 'utf8');
     // Read CSV and convert to JSON
     let customersData = await csv().fromString(input);
@@ -109,7 +106,7 @@ const run = async options => {
     customersData = scrubCustomers(customersData);
 
     // Import deals
-    console.log('Running deals import...');
+    console.log('Importing deals...');
     input = fs.readFileSync(options.deals.input, 'utf8');
     // Read CSV and convert to JSON
     let dealsData = await csv().fromString(input);
@@ -130,6 +127,7 @@ const run = async options => {
     });
 
     // Filter out customers from previous import
+    console.log('Filtering customers from previous import...');
     let previousCustomersImport = fs.readFileSync(
         options.customers.previousImport,
         'utf8'
@@ -153,6 +151,7 @@ const run = async options => {
         .filter(obj => obj !== null);
 
     // Filter out deals from previous import
+    console.log('Filtering deals from previous import...');
     let previousDealsImport = fs.readFileSync(
         options.deals.previousImport,
         'utf8'
@@ -173,6 +172,7 @@ const run = async options => {
     });
 
     // Merge data for upload
+    console.log('Merging data for upload...');
     customersData = customersData.map(customer => {
         let out = {
             email: customer.email,
@@ -232,6 +232,7 @@ const run = async options => {
     });
 
     // Get customer VIDs for deals associations
+    console.log('Fetching customer VIDs for deal associations...');
     let dealsPromises = dealsData.map(deal => {
         let customer = customersData.find(
             customer =>
@@ -272,6 +273,7 @@ const run = async options => {
     dealsData = await Promise.all(dealsPromises);
 
     // Upload data to HubSpot
+    console.log('Uploading data to HubSpot...');
     await uploadCustomers(customersData, options);
     await uploadDeals(dealsData, options);
 

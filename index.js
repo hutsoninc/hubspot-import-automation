@@ -182,7 +182,7 @@ const run = async options => {
     console.log(newDealsData.length + ' deals.');
 
     // Merge data for upload
-    console.log('Merging data for upload...');
+    console.log('Merging customer data for upload...');
     newCustomersData = newCustomersData.map(customer => {
         let out = {
             email: customer.email,
@@ -243,7 +243,14 @@ const run = async options => {
         return out;
     });
 
+    // Upload customers to HubSpot
+    console.log('Uploading customers to HubSpot...');
+    await uploadCustomers(newCustomersData, options);
+
     // Fetch HubSpot contacts for deal associations
+    console.log(
+        `Fetching customer VIDs for ${newDealsData.length} deal associations...`
+    );
     let hubspotCustomers = await fetchHubspotCustomer();
 
     hubspotCustomers = hubspotCustomers
@@ -260,9 +267,6 @@ const run = async options => {
         .filter(obj => obj !== null);
 
     // Match contact VIDs to deals for associations
-    console.log(
-        `Fetching customer VIDs for ${newDealsData.length} deal associations...`
-    );
     newDealsData = newDealsData
         .map(deal => {
             let customer = hubspotCustomers.find(
@@ -299,9 +303,8 @@ const run = async options => {
         })
         .filter(obj => obj !== null);
 
-    // Upload data to HubSpot
-    console.log('Uploading data to HubSpot...');
-    await uploadCustomers(newCustomersData, options);
+    // Upload deals to HubSpot
+    console.log('Uploading deals to HubSpot...');
     await uploadDeals(newDealsData, options);
 
     // Save imports

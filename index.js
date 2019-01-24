@@ -11,8 +11,8 @@ const scrubCustomers = require('./src/customers-scrubber');
 const scrubDeals = require('./src/deals-scrubber');
 const csv = require('csvtojson');
 const Promise = require('bluebird');
-const { uploadCustomers } = require('./src/customers');
-const { uploadDeals } = require('./src/deals');
+const uploadCustomers = require('./src/customers');
+const uploadDeals = require('./src/deals');
 const { isEqualObj } = require('./src/utils');
 
 const isRunning = async query => {

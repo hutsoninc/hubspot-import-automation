@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Hubspot = require('hubspot');
 const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
+const fetchHubspotCustomer = require('./src/fetch-hubspot-customers');
 const scrubCustomers = require('./src/customers-scrubber');
 const scrubDeals = require('./src/deals-scrubber');
 const csv = require('csvtojson');
@@ -241,53 +242,57 @@ const run = async options => {
         return out;
     });
 
-    // Get customer VIDs for deals associations
+    // Fetch HubSpot contacts for deal associations
+    let hubspotCustomers = await fetchHubspotCustomer();
+
+    hubspotCustomers = hubspotCustomers
+        .map(obj => {
+            let customerCode = obj.properties.customer_code;
+            if (customerCode) {
+                return {
+                    customer_code: customerCode.value,
+                    vid: obj.vid,
+                };
+            }
+            return null;
+        })
+        .filter(obj => obj !== null);
+
+    // Match contact VIDs to deals for associations
     console.log(
         `Fetching customer VIDs for ${dealsData.length} deal associations...`
     );
-    let dealsPromises = dealsData.map(deal => {
-        let customer = customersData.find(
-            customer =>
-                customer.customer_code.toUpperCase() ===
-                deal.customer_code.toUpperCase()
-        );
-        if (customer.email) {
-            return hubspot.contacts
-                .getByEmail(customer.email)
-                .then(contact => {
-                    if (contact && contact.vid) {
-                        return {
-                            pipeline: deal.pipeline,
-                            dealstage: deal.dealstage,
-                            dealname: deal.dealname,
-                            amount: deal.amount,
-                            closedate: deal.closedate,
-                            vin_number: deal.vin_number,
-                            stock_number: deal.stock_number,
-                            equipment_make: deal.equipment_make,
-                            equipment_model: deal.equipment_model,
-                            equipment_category: deal.equipment_category,
-                            equipment_subcategory: deal.equipment_subcategory,
-                            new_or_used: deal.new_or_used,
-                            year_manufactured: deal.year_manufactured,
-                            associations: {
-                                associatedVids: [contact.vid],
-                            },
-                        };
-                    }
-                    return null;
-                })
-                .catch(err => {
-                    console.error(err);
-                });
-        } else {
-            return null;
-        }
-    });
-
-    dealsData = await Promise.all(dealsPromises);
-
-    dealsData = dealsData.filter(obj => obj !== null);
+    let dealsData = dealsData
+        .map(deal => {
+            let customer = hubspotCustomers.find(
+                customer =>
+                    customer.customer_code.toUpperCase() ===
+                    deal.customer_code.toUpperCase()
+            );
+            if (customer) {
+                return {
+                    pipeline: deal.pipeline,
+                    dealstage: deal.dealstage,
+                    dealname: deal.dealname,
+                    amount: deal.amount,
+                    closedate: deal.closedate,
+                    vin_number: deal.vin_number,
+                    stock_number: deal.stock_number,
+                    equipment_make: deal.equipment_make,
+                    equipment_model: deal.equipment_model,
+                    equipment_category: deal.equipment_category,
+                    equipment_subcategory: deal.equipment_subcategory,
+                    new_or_used: deal.new_or_used,
+                    year_manufactured: deal.year_manufactured,
+                    associations: {
+                        associatedVids: [customer.vid],
+                    },
+                };
+            } else {
+                return null;
+            }
+        })
+        .filter(obj => obj !== null);
 
     // Upload data to HubSpot
     console.log('Uploading data to HubSpot...');

@@ -1,12 +1,16 @@
-const { validatePhone, validateEmail, validateZip, validateState, validateHutsonBranch } = require('@hutsoninc/data-scrubber');
+const {
+    validatePhone,
+    validateEmail,
+    validateZip,
+    validateState,
+    validateHutsonBranch,
+} = require('@hutsoninc/data-scrubber');
 const { toTitleCase } = require('./utils');
 
 module.exports = function scrub(data) {
-
     console.log('Scrubbing ' + data.length + ' records...');
 
     data = data.map(row => {
-
         obj = Object.assign({}, row);
 
         let out = {};
@@ -15,7 +19,7 @@ module.exports = function scrub(data) {
         out.email = validateEmail(obj.contact_email_address);
         delete obj.contact_email_address;
 
-        if (obj.contact_country === "US") {
+        if (obj.contact_country === 'US') {
             // Phone Number
             out.phone = validatePhone(obj.contact_bus_phone);
         } else {
@@ -102,27 +106,31 @@ module.exports = function scrub(data) {
 
         // Sales Value
         out.amount = String(obj.vhstock_sales_value).trim();
-        delete vhstock_sales_value
+        delete vhstock_sales_value;
 
         out.dealstage = 'closedwon';
         out.pipeline = 'default';
 
         return out;
-
     });
 
     data = data.filter(obj => obj);
 
     data = data.map(row => {
-
         obj = Object.assign({}, row);
 
-        obj.dealname = `${obj.year_manufactured ? obj.year_manufactured + ' ' : ''}${obj.equipment_make ? obj.equipment_make + ' ' : ''}${obj.equipment_model ? obj.equipment_model : ''}${(obj.firstname && obj.lastname) ? ' - ' + obj.firstname + ' ' + obj.lastname : ''}`;
+        obj.dealname = `${
+            obj.year_manufactured ? obj.year_manufactured + ' ' : ''
+        }${obj.equipment_make ? obj.equipment_make + ' ' : ''}${
+            obj.equipment_model ? obj.equipment_model : ''
+        }${
+            obj.firstname && obj.lastname
+                ? ' - ' + obj.firstname + ' ' + obj.lastname
+                : ''
+        }`;
 
         return obj;
-
     });
 
     return data;
-
-}
+};

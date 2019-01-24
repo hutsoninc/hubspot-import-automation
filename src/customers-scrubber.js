@@ -1,11 +1,15 @@
-const { validatePhone, validateEmail, validateZip, validateState, validateHutsonBranch } = require('@hutsoninc/data-scrubber');
+const {
+    validatePhone,
+    validateEmail,
+    validateZip,
+    validateState,
+    validateHutsonBranch,
+} = require('@hutsoninc/data-scrubber');
 
 module.exports = function scrub(data) {
-
     console.log('Scrubbing ' + data.length + ' records...');
 
     data = data.map(row => {
-
         obj = Object.assign({}, row);
 
         let out = {};
@@ -56,13 +60,11 @@ module.exports = function scrub(data) {
         delete obj.City;
 
         return out;
-
     });
 
     data = data.filter(obj => obj);
 
     data = data.map(row => {
-
         obj = Object.assign({}, row);
 
         if (obj.businessphone) {
@@ -74,5 +76,4 @@ module.exports = function scrub(data) {
     });
 
     return data;
-
-}
+};

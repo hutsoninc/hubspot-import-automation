@@ -29,5 +29,5 @@ function toTitleCase(str) {
 
 module.exports = {
     isEqualObj,
-    toTitleCase
-}
+    toTitleCase,
+};

@@ -262,7 +262,7 @@ const run = async options => {
     console.log(
         `Fetching customer VIDs for ${dealsData.length} deal associations...`
     );
-    let dealsData = dealsData
+    dealsData = dealsData
         .map(deal => {
             let customer = hubspotCustomers.find(
                 customer =>

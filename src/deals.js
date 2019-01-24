@@ -1,4 +1,3 @@
-const fs = require('fs');
 const Hubspot = require('hubspot');
 const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
 const Promise = require('bluebird');

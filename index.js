@@ -36,7 +36,7 @@ const sendEmailAlert = async () => {
             from: process.env.GMAIL_EMAIL,
             to: 'agordon@hutsoninc.com',
             subject: 'HubSpot Import Server Error',
-            html: 'Please fix me',
+            html: 'Excel process needs to be started.',
         };
         transporter.sendMail(mailOptions, function(err, info) {
             if (err) reject(err);

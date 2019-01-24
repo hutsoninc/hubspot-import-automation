@@ -34,7 +34,7 @@ module.exports = async function uploadCustomers(data, options) {
                     console.log(contact);
                 })
                 .catch(err => {
-                    console.error(err);
+                    console.log(err);
                 });
         });
 

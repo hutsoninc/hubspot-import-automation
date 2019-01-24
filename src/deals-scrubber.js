@@ -101,7 +101,7 @@ module.exports = function scrub(data) {
         delete obj.vhstock_salesdate;
 
         // Company Name
-        out.company_name = String(obj.contact_company_name).trim();
+        out.company = String(obj.contact_company_name).trim();
         delete obj.contact_company_name;
 
         // Sales Value

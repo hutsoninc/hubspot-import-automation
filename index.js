@@ -67,7 +67,8 @@ const run = async options => {
 
     console.log('Checking for excel process...');
     let running = await isRunning('wfica32.exe').catch(err => {
-        console.error(err);
+        console.log(err);
+        process.exit(1);
     });
 
     if (!running) {
@@ -79,7 +80,7 @@ const run = async options => {
                 process.exit(0);
             })
             .catch(err => {
-                console.error(err);
+                console.log(err);
             });
         process.exit(0);
     }
@@ -195,7 +196,7 @@ const run = async options => {
             city: customer.city,
             firstname: '',
             lastname: '',
-            company_name: '',
+            company: '',
         };
 
         let deals = newDealsData.filter(
@@ -232,8 +233,8 @@ const run = async options => {
             if (out.city === '') {
                 out.city = deal.city;
             }
-            if (out.company_name === '') {
-                out.company_name = deal.company_name;
+            if (out.company === '') {
+                out.company = deal.company;
             }
         });
 
@@ -304,6 +305,7 @@ const run = async options => {
     await uploadDeals(newDealsData, options);
 
     // Save imports
+    console.log('Saving import data...');
     fs.writeFileSync(
         options.customers.previousImport,
         JSON.stringify(customersData)
@@ -328,6 +330,6 @@ run()
         process.exit(0);
     })
     .catch(err => {
-        console.error(err);
+        console.log(err);
         process.exit(1);
     });

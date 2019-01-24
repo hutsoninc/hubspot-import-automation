@@ -40,15 +40,6 @@ module.exports = async function uploadCustomers(data, options) {
 
         return await Promise.all(promises).then(() => {
             console.log(count + ' contacts updated or added.');
-            // Write new data to previous import file for next run
-            fs.writeFile(
-                options.customers.previousImport,
-                JSON.stringify(data),
-                err => {
-                    if (err) throw new Error(err);
-                    return;
-                }
-            );
         });
     }
 

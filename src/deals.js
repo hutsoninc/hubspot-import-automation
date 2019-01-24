@@ -41,16 +41,7 @@ module.exports = async function uploadDeals(data, options) {
         });
 
         return await Promise.all(promises).then(() => {
-            console.log(`${count} deals updated or added.`);
-            // Write new data to previous import file for next run
-            fs.writeFile(
-                options.deals.previousImport,
-                JSON.stringify(data),
-                err => {
-                    if (err) throw new Error(err);
-                    return;
-                }
-            );
+            console.log(`${count} deals added.`);
         });
     }
 

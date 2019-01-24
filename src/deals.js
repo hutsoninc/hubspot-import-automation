@@ -52,8 +52,6 @@ module.exports = async function uploadDeals(data, options) {
                 }
             );
         });
-    } else {
-        fs.writeFileSync(options.deals.previousImport, JSON.stringify(data));
     }
 
     return;

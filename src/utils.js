@@ -21,6 +21,16 @@ function isEqualObj(a, b) {
     return true;
 }
 
+function removeEmptyValues(obj) {
+    let keys = Object.keys(obj);
+    for( let i = 0; i < keys.length; i++) {
+        let val = obj[keys[i]]
+        if( val === '' || val === null || val === undefined) {
+            delete obj[keys[i]]
+        }
+    }
+}
+
 function toTitleCase(str) {
     arr = str.toLowerCase().split(' ');
     arr = arr.map(s => s.charAt(0).toUpperCase() + s.slice(1));
@@ -29,5 +39,6 @@ function toTitleCase(str) {
 
 module.exports = {
     isEqualObj,
+    removeEmptyValues,
     toTitleCase,
 };

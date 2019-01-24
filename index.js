@@ -4,8 +4,6 @@ const nodemailer = require('nodemailer');
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
 const path = require('path');
-const Hubspot = require('hubspot');
-const hubspot = new Hubspot({ apiKey: process.env.HUBSPOT_API_KEY });
 const fetchHubspotCustomer = require('./src/fetch-hubspot-customers');
 const scrubCustomers = require('./src/customers-scrubber');
 const scrubDeals = require('./src/deals-scrubber');
@@ -13,7 +11,7 @@ const csv = require('csvtojson');
 const Promise = require('bluebird');
 const uploadCustomers = require('./src/customers');
 const uploadDeals = require('./src/deals');
-const { isEqualObj } = require('./src/utils');
+const { isEqualObj, removeEmptyValues } = require('./src/utils');
 
 const isRunning = async query => {
     return new Promise(function(resolve, reject) {
@@ -163,7 +161,7 @@ const run = async options => {
         'utf8'
     );
     previousDealsImport = JSON.parse(previousDealsImport);
-    dealsData = dealsData
+    let newDealsData = dealsData
         .map(deal => {
             let record = previousDealsImport.find(obj => {
                 if (obj && deal) {
@@ -180,7 +178,7 @@ const run = async options => {
         })
         .filter(obj => obj !== null);
 
-    console.log(dealsData.length + ' deals.');
+    console.log(newDealsData.length + ' deals.');
 
     // Merge data for upload
     console.log('Merging data for upload...');
@@ -200,7 +198,7 @@ const run = async options => {
             company_name: '',
         };
 
-        let deals = dealsData.filter(
+        let deals = newDealsData.filter(
             obj =>
                 obj.customer_code.toUpperCase() ===
                 customer.customer_code.toUpperCase()
@@ -239,6 +237,8 @@ const run = async options => {
             }
         });
 
+        out = removeEmptyValues(out);
+
         return out;
     });
 
@@ -260,9 +260,9 @@ const run = async options => {
 
     // Match contact VIDs to deals for associations
     console.log(
-        `Fetching customer VIDs for ${dealsData.length} deal associations...`
+        `Fetching customer VIDs for ${newDealsData.length} deal associations...`
     );
-    dealsData = dealsData
+    newDealsData = newDealsData
         .map(deal => {
             let customer = hubspotCustomers.find(
                 customer =>
@@ -270,7 +270,7 @@ const run = async options => {
                     deal.customer_code.toUpperCase()
             );
             if (customer) {
-                return {
+                let out = {
                     pipeline: deal.pipeline,
                     dealstage: deal.dealstage,
                     dealname: deal.dealname,
@@ -288,6 +288,10 @@ const run = async options => {
                         associatedVids: [customer.vid],
                     },
                 };
+
+                out = removeEmptyValues(out);
+
+                return out;
             } else {
                 return null;
             }
@@ -297,7 +301,14 @@ const run = async options => {
     // Upload data to HubSpot
     console.log('Uploading data to HubSpot...');
     await uploadCustomers(newCustomersData, options);
-    await uploadDeals(dealsData, options);
+    await uploadDeals(newDealsData, options);
+
+    // Save imports
+    fs.writeFileSync(
+        options.customers.previousImport,
+        JSON.stringify(customersData)
+    );
+    fs.writeFileSync(options.deals.previousImport, JSON.stringify(dealsData));
 
     // Create backups
     console.log('Creating backups...');

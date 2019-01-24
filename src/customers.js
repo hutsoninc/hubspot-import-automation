@@ -50,11 +50,6 @@ module.exports = async function uploadCustomers(data, options) {
                 }
             );
         });
-    } else {
-        fs.writeFileSync(
-            options.customers.previousImport,
-            JSON.stringify(data)
-        );
     }
 
     return;

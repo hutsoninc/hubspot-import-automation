@@ -20,10 +20,10 @@ module.exports = async function fetchHubspotCustomers(options) {
         deals = deals.concat(set.contacts);
 
         if (set['has-more']) {
+            await loop();
+        } else {
             console.log(deals.length + ' HubSpot customers fetched');
             return;
-        } else {
-            await loop();
         }
     }
 

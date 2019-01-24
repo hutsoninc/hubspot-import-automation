@@ -23,12 +23,13 @@ function isEqualObj(a, b) {
 
 function removeEmptyValues(obj) {
     let keys = Object.keys(obj);
-    for( let i = 0; i < keys.length; i++) {
-        let val = obj[keys[i]]
-        if( val === '' || val === null || val === undefined) {
-            delete obj[keys[i]]
+    for (let i = 0; i < keys.length; i++) {
+        let val = obj[keys[i]];
+        if (val === '' || val === null || val === undefined) {
+            delete obj[keys[i]];
         }
     }
+    return obj;
 }
 
 function toTitleCase(str) {

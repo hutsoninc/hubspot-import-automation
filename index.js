@@ -4,13 +4,15 @@ const nodemailer = require('nodemailer');
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
 const path = require('path');
-const fetchHubspotCustomer = require('./src/fetch-hubspot-customers');
+const fetchHubspotCustomers = require('./src/fetch-hubspot-customers');
 const scrubCustomers = require('./src/customers-scrubber');
 const scrubDeals = require('./src/deals-scrubber');
+const scrubParts = require('./src/parts-scrubber');
 const csv = require('csvtojson');
 const Promise = require('bluebird');
 const uploadCustomers = require('./src/customers');
 const uploadDeals = require('./src/deals');
+const uploadParts = require('./src/parts');
 const { isEqualObj, removeEmptyValues } = require('./src/utils');
 
 const isRunning = async query => {
@@ -59,6 +61,10 @@ const run = async options => {
                 input: path.join(__dirname, '../data/deals.csv'), // Data from query
                 previousImport: path.join(__dirname, '../data/deals-out.json'), // Previous import data
             },
+            parts: {
+                input: path.join(__dirname, '../data/parts.csv'), // Data from query
+                previousImport: path.join(__dirname, '../data/parts-out.json'), // Previous import data
+            },
             upload: true, // Should the new data be uploaded to HubSpot
             limit: 5, // Number of concurrent executions
         },
@@ -98,6 +104,10 @@ const run = async options => {
         `${userprofile}/OneDrive - Hutson, Inc/data/deals.csv`,
         `${userprofile}/projects/data/deals.csv`
     );
+    await fs.copyFile(
+        `${userprofile}/OneDrive - Hutson, Inc/data/parts.csv`,
+        `${userprofile}/projects/data/parts.csv`
+    );
 
     // Import customers
     console.log('Importing customers...');
@@ -127,6 +137,32 @@ const run = async options => {
         }
         return false;
     });
+
+    // Import parts
+    console.log('Importing parts...');
+    input = fs.readFileSync(options.parts.input, 'utf8');
+    // Read CSV and convert to JSON
+    let partsData = await csv().fromString(input);
+    // Scrub data
+    partsData = scrubParts(partsData);
+    // Filter out parts without a customer record
+    let accountNumbers = customersData
+        .map(obj => {
+            if (obj.customer_account_number) {
+                return Number(obj.customer_account_number);
+            }
+            return null;
+        })
+        .filter(obj => obj !== null);
+
+    partsData = partsData
+        .map(part => {
+            if (accountNumbers.indexOf(part.customer_account_number) >= 0) {
+                return part;
+            }
+            return null;
+        })
+        .filter(obj => obj !== null);
 
     // Filter out customers from previous import
     console.log('Filtering customers from previous import...');
@@ -180,6 +216,32 @@ const run = async options => {
         .filter(obj => obj !== null);
 
     console.log(newDealsData.length + ' deals.');
+
+    // Filter out parts from previous import
+    console.log('Filtering parts from previous import...');
+    let previousPartsImport = fs.readFileSync(
+        options.parts.previousImport,
+        'utf8'
+    );
+    previousPartsImport = JSON.parse(previousPartsImport);
+    let newPartsData = partsData
+        .map(part => {
+            let record = previousPartsImport.find(obj => {
+                if (obj && part) {
+                    return obj.transaction_id === part.transaction_id;
+                } else {
+                    return false;
+                }
+            });
+            if (record) {
+                // Part found in previous import
+                return null;
+            }
+            return part;
+        })
+        .filter(obj => obj !== null);
+
+    console.log(newPartsData.length + ' parts.');
 
     // Merge data for upload
     console.log('Merging customer data for upload...');
@@ -252,26 +314,29 @@ const run = async options => {
         JSON.stringify(customerErrors)
     );
 
-    // Fetch HubSpot contacts for deal associations
+    // Fetch HubSpot contacts for associations
     console.log(
         `Fetching customer VIDs for ${newDealsData.length} deal associations...`
     );
-    let hubspotCustomers = await fetchHubspotCustomer();
+    let hubspotCustomers = await fetchHubspotCustomers();
 
     hubspotCustomers = hubspotCustomers
         .map(obj => {
             let customerCode = obj.properties.customer_code;
-            if (customerCode) {
-                return {
-                    customer_code: customerCode.value,
-                    vid: obj.vid,
-                };
+            let customerAccountNumber = obj.properties.customer_account_number;
+            if (!customerCode && !customerAccountNumber) {
+                return null;
             }
-            return null;
+            return {
+                customer_account_number: customerAccountNumber.value,
+                customer_code: customerCode.value,
+                vid: obj.vid,
+            };
         })
         .filter(obj => obj !== null);
 
     // Match contact VIDs to deals for associations
+    console.log('Associating contacts with deals...');
     newDealsData = newDealsData
         .map(deal => {
             let customer = hubspotCustomers.find(
@@ -322,6 +387,53 @@ const run = async options => {
         JSON.stringify(dealErrors)
     );
 
+    // Match contact VIDs to parts for associations
+    console.log('Associating contacts with parts...');
+    newPartsData = newPartsData
+        .map(part => {
+            let customer = hubspotCustomers.find(
+                customer =>
+                    Number(customer.customer_account_number) ===
+                    Number(part.customer_account_number)
+            );
+            if (customer) {
+                let out = {
+                    properties: {
+                        quantity: part.quantity,
+                        branch: part.branch,
+                        part_franchise: part.part_franchise,
+                        part_number: part.part_number,
+                        closedate: part.closedate,
+                        part_list_price: part.part_list_price,
+                        amount: part.amount,
+                        online_order: part.online_order,
+                        transaction_id: part.transaction_id,
+                        dealname: part.dealname,
+                        dealstage: part.dealstage,
+                        pipeline: part.pipeline,
+                    },
+                    associations: {
+                        associatedVids: [customer.vid],
+                    },
+                };
+
+                out = removeEmptyValues(out);
+
+                return out;
+            } else {
+                return null;
+            }
+        })
+        .filter(obj => obj !== null);
+
+    // Upload parts to HubSpot
+    console.log('Uploading parts to HubSpot...');
+    let partErrors = await uploadParts(newPartsData, options);
+    fs.writeFileSync(
+        `${userprofile}/projects/data/logs/part-errors-${Date.now()}.json`,
+        JSON.stringify(partErrors)
+    );
+
     // Save imports
     if (options.upload) {
         console.log('Saving import data...');
@@ -332,6 +444,10 @@ const run = async options => {
         fs.writeFileSync(
             options.deals.previousImport,
             JSON.stringify(dealsData)
+        );
+        fs.writeFileSync(
+            options.parts.previousImport,
+            JSON.stringify(partsData)
         );
     }
 
@@ -344,6 +460,10 @@ const run = async options => {
     await fs.copyFile(
         `${userprofile}/projects/data/deals-out.json`,
         `${userprofile}/projects/data/backups/deals-out-${Date.now()}.json`
+    );
+    await fs.copyFile(
+        `${userprofile}/projects/data/parts-out.json`,
+        `${userprofile}/projects/data/backups/parts-out-${Date.now()}.json`
     );
 };
 

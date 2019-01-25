@@ -7,7 +7,7 @@ module.exports = async function fetchHubspotCustomers(options) {
     options = Object.assign(
         {
             count: 100,
-            property: ['email', 'customer_code']
+            property: ['email', 'customer_code', 'customer_account_number']
         },
         options
     );

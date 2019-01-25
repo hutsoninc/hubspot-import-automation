@@ -16,9 +16,7 @@ function formatData(obj) {
     return res;
 }
 
-module.exports = async function uploadCustomers(data, options) {
-    options = Object.assign({}, options);
-
+module.exports = async function upload(data, options) {
     // Upload data to HubSpot
     if (options.upload) {
         console.log('Updating customers in HubSpot...');

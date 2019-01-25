@@ -9,68 +9,53 @@ const {
 module.exports = function scrub(data) {
     console.log('Scrubbing ' + data.length + ' records...');
 
-    data = data.map(row => {
-        obj = Object.assign({}, row);
+    data = data
+        .map(obj => {
+            let out = {};
 
-        let out = {};
+            // Email
+            out.email = validateEmail(obj.Email);
 
-        // Email
-        out.email = validateEmail(obj.Email);
-        delete obj.Email;
+            // If no email, remove customer
+            if (out.email === '') {
+                return null;
+            }
 
-        // If no email, remove customer
-        if (out.email === '') {
-            return null;
-        }
+            // Phone Number
+            out.phone = validatePhone(obj.HomePhone);
 
-        // Phone Number
-        out.phone = validatePhone(obj.HomePhone);
-        delete obj.HomePhone;
+            // Business Phone Number
+            out.businessphone = validatePhone(obj.BusinessPhone);
 
-        // Business Phone Number
-        out.businessphone = validatePhone(obj.BusinessPhone);
-        delete obj.BusinessPhone;
+            // Mobile Phone Number
+            out.mobilephone = validatePhone(obj.MobilePhone);
 
-        // Mobile Phone Number
-        out.mobilephone = validatePhone(obj.MobilePhone);
-        delete obj.MobilePhone;
+            // State
+            out.state = validateState(obj.State);
 
-        // State
-        out.state = validateState(obj.State);
-        delete obj.State;
+            // Zip
+            out.zip = validateZip(obj.ZIP);
 
-        // Zip
-        out.zip = validateZip(obj.ZIP);
-        delete obj.ZIP;
+            // Hutson Branch
+            out.branch = validateHutsonBranch(obj.Territory);
 
-        // Hutson Branch
-        out.branch = validateHutsonBranch(obj.Territory);
-        delete obj.Territory;
+            // Customer Code
+            out.customer_code = String(obj.CustomerCode).trim();
 
-        // Customer Code
-        out.customer_code = String(obj.CustomerCode).trim();
-        delete obj.CustomerCode;
+            // Customer Account Number
+            out.customer_account_number = Number(obj.AccountNumber);
 
-        // Customer Account Number
-        out.customer_account_number = Number(obj.AccountNumber);
-        delete obj.AccountNumber;
+            // Address
+            out.address = String(obj.Address1).trim();
 
-        // Address
-        out.address = String(obj.Address1).trim();
-        delete obj.Address1;
+            // City
+            out.city = String(obj.City).trim();
 
-        // City
-        out.city = String(obj.City).trim();
-        delete obj.City;
+            return out;
+        })
+        .filter(obj => obj);
 
-        return out;
-    });
-
-    data = data.filter(obj => obj);
-
-    data = data.map(row => {
-        obj = Object.assign({}, row);
-
+    data = data.map(obj => {
         if (obj.businessphone) {
             obj.phone = obj.businessphone;
         }

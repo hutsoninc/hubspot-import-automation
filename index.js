@@ -279,7 +279,7 @@ const run = async options => {
                     pipeline: deal.pipeline,
                     dealstage: deal.dealstage,
                     dealname: deal.dealname,
-                    amount: deal.amount,
+                    amount: Number(deal.amount),
                     closedate: deal.closedate,
                     vin_number: deal.vin_number,
                     stock_number: deal.stock_number,
@@ -293,6 +293,10 @@ const run = async options => {
                         associatedVids: [customer.vid],
                     },
                 };
+
+                if (isNan(out.amount)) {
+                    out.amount = 0;
+                }
 
                 out = removeEmptyValues(out);
 

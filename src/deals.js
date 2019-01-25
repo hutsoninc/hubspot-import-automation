@@ -29,6 +29,7 @@ module.exports = async function uploadDeals(data, options) {
         console.log(`Updating ${data.length} deals in HubSpot...`);
 
         let count = 0;
+        let errLogs = [];
 
         promises = data.map(entry => {
             return hubspot.deals
@@ -39,11 +40,13 @@ module.exports = async function uploadDeals(data, options) {
                 })
                 .catch(err => {
                     console.log(err);
+                    errLogs.push(err);
                 });
         });
 
         return await Promise.all(promises).then(() => {
             console.log(`${count} deals added.`);
+            return errLogs;
         });
     }
 

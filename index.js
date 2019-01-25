@@ -245,7 +245,11 @@ const run = async options => {
 
     // Upload customers to HubSpot
     console.log('Uploading customers to HubSpot...');
-    await uploadCustomers(newCustomersData, options);
+    let customerErrors = await uploadCustomers(newCustomersData, options);
+    fs.writeFileSync(
+        `${userprofile}/projects/data/logs/customer-errors-${Date.now()}.json`,
+        JSON.stringify(customerErrors)
+    );
 
     // Fetch HubSpot contacts for deal associations
     console.log(
@@ -311,7 +315,11 @@ const run = async options => {
 
     // Upload deals to HubSpot
     console.log('Uploading deals to HubSpot...');
-    await uploadDeals(newDealsData, options);
+    let dealErrors = await uploadDeals(newDealsData, options);
+    fs.writeFileSync(
+        `${userprofile}/projects/data/logs/deal-errors-${Date.now()}.json`,
+        JSON.stringify(dealErrors)
+    );
 
     // Save imports
     console.log('Saving import data...');

@@ -24,6 +24,7 @@ module.exports = async function uploadCustomers(data, options) {
         console.log('Updating customers in HubSpot...');
 
         let count = 0;
+        let errLogs = [];
 
         let promises = data.map(entry => {
             return hubspot.contacts
@@ -34,11 +35,13 @@ module.exports = async function uploadCustomers(data, options) {
                 })
                 .catch(err => {
                     console.log(err);
+                    errLogs.push(err);
                 });
         });
 
         return await Promise.all(promises).then(() => {
             console.log(count + ' contacts updated or added.');
+            return errLogs;
         });
     }
 

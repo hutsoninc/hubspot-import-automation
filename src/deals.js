@@ -14,7 +14,7 @@ function formatData(obj) {
         if (keys[i] !== 'customer_code') {
             res.properties.push({
                 name: keys[i],
-                value: obj[keys[i]],
+                value: obj.properties[keys[i]],
             });
         }
     }

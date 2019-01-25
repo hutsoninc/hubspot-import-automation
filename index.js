@@ -294,7 +294,7 @@ const run = async options => {
                     },
                 };
 
-                if (isNan(out.amount)) {
+                if (isNaN(out.amount)) {
                     out.amount = 0;
                 }
 

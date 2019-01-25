@@ -322,12 +322,17 @@ const run = async options => {
     );
 
     // Save imports
-    console.log('Saving import data...');
-    fs.writeFileSync(
-        options.customers.previousImport,
-        JSON.stringify(customersData)
-    );
-    fs.writeFileSync(options.deals.previousImport, JSON.stringify(dealsData));
+    if (options.upload) {
+        console.log('Saving import data...');
+        fs.writeFileSync(
+            options.customers.previousImport,
+            JSON.stringify(customersData)
+        );
+        fs.writeFileSync(
+            options.deals.previousImport,
+            JSON.stringify(dealsData)
+        );
+    }
 
     // Create backups
     console.log('Creating backups...');

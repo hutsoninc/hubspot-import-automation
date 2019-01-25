@@ -35,7 +35,7 @@ module.exports = function scrub(data) {
             out.part_list_price = Number(obj.LIST_PRICE);
 
             // Sale Amount
-            out.amount = Number(out.list_price * out.quantity) || 0;
+            out.amount = Number(obj.LIST_PRICE) * Number(obj.QTY) || 0;
 
             // Online Order
             out.online_order = obj.Online_Order;
@@ -45,7 +45,7 @@ module.exports = function scrub(data) {
 
             out.dealname = `${out.part_number} - ${out.transaction_id}`;
             out.dealstage = 'closedwon';
-            out.pipeline = 'default';
+            out.pipeline = 'parts';
 
             return out;
         })

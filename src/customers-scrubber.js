@@ -51,6 +51,10 @@ module.exports = function scrub(data) {
         out.customer_code = String(obj.CustomerCode).trim();
         delete obj.CustomerCode;
 
+        // Customer Account Number
+        out.customer_account_number = Number(obj.AccountNumber);
+        delete obj.AccountNumber;
+
         // Address
         out.address = String(obj.Address1).trim();
         delete obj.Address1;

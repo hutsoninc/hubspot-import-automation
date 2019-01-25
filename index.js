@@ -192,6 +192,7 @@ const run = async options => {
             zip: customer.zip,
             branch: customer.branch,
             customer_code: customer.customer_code,
+            customer_account_number: customer.customer_account_number,
             address: customer.address,
             city: customer.city,
             firstname: '',

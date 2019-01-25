@@ -97,7 +97,7 @@ module.exports = function scrub(data) {
         delete obj.vhstock_year_manuf;
 
         // Sales Date
-        out.closedate = Date.now(obj.vhstock_salesdate);
+        out.closedate = Date.parse(obj.vhstock_salesdate);
         delete obj.vhstock_salesdate;
 
         // Company Name

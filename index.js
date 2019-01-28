@@ -316,7 +316,7 @@ const run = async options => {
 
     // Fetch HubSpot contacts for associations
     console.log(
-        `Fetching customer VIDs for ${newDealsData.length} deal associations...`
+        `Fetching customer VIDs...`
     );
     let hubspotCustomers = await fetchHubspotCustomers();
 
@@ -324,7 +324,7 @@ const run = async options => {
         .map(obj => {
             let customerCode = obj.properties.customer_code;
             let customerAccountNumber = obj.properties.customer_account_number;
-            if (!customerCode && !customerAccountNumber) {
+            if (!customerCode || !customerAccountNumber) {
                 return null;
             }
             return {

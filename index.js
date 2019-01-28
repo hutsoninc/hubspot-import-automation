@@ -1,9 +1,9 @@
 'use strict';
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 const nodemailer = require('nodemailer');
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
-const path = require('path');
 const fetchHubspotCustomers = require('./src/fetch-hubspot-customers');
 const scrubCustomers = require('./src/customers-scrubber');
 const scrubDeals = require('./src/deals-scrubber');
@@ -315,9 +315,7 @@ const run = async options => {
     );
 
     // Fetch HubSpot contacts for associations
-    console.log(
-        `Fetching customer VIDs...`
-    );
+    console.log(`Fetching customer VIDs...`);
     let hubspotCustomers = await fetchHubspotCustomers();
 
     hubspotCustomers = hubspotCustomers

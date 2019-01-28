@@ -35,8 +35,8 @@ module.exports = async function upload(data, options) {
                     console.log(deal);
                 })
                 .catch(err => {
-                    console.log(err);
-                    errLogs.push(err);
+                    console.log(err.message);
+                    errLogs.push(err.message);
                 });
         });
 

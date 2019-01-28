@@ -44,7 +44,7 @@ module.exports = function scrub(data) {
             out.transaction_id = obj.trans_id;
 
             out.dealname = `${out.part_number} - ${out.transaction_id}`;
-            out.dealstage = 'closedwon';
+            out.dealstage = '7764f9f7-3ec5-4e1f-a78b-400612ce5f90';
             out.pipeline = '86c7aeff-6e43-489e-825c-8175a137a679';
 
             return out;

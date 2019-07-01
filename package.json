@@ -24,7 +24,7 @@
     "bluebird": "^3.5.3",
     "csvtojson": "^2.0.8",
     "dotenv": "^6.2.0",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^8.1.0",
     "hubspot": "git+https://github.com/AustinLeeGordon/node-hubspot.git",
     "nodemailer": "^4.7.0"
   },

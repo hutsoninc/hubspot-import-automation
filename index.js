@@ -1,98 +1,24 @@
-'use strict';
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, './.env') });
-const nodemailer = require('nodemailer');
-const exec = require('child_process').exec;
 const fs = require('fs-extra');
 const fetchHubspotCustomers = require('./src/fetch-hubspot-customers');
-const scrubCustomers = require('./src/customers-scrubber');
-const scrubDeals = require('./src/deals-scrubber');
-const scrubParts = require('./src/parts-scrubber');
+const scrubCustomers = require('./src/scrub-customers');
+const scrubDeals = require('./src/scrub-deals');
+const scrubParts = require('./src/scrub-parts');
 const csv = require('csvtojson');
-const Promise = require('bluebird');
-const uploadCustomers = require('./src/customers');
-const uploadDeals = require('./src/deals');
-const uploadParts = require('./src/parts');
+const uploadCustomers = require('./src/upload-customers');
+const uploadDeals = require('./src/upload-deals');
+const uploadParts = require('./src/upload-parts');
 const { isEqualObj, removeEmptyValues } = require('./src/utils');
+const checkProcess = require('./src/check-process');
+const defaultOptions = require('./src/default-options');
 
-const isRunning = async query => {
-    return new Promise(function(resolve, reject) {
-        exec('tasklist', (err, stdout, stderr) => {
-            if (err) reject(err);
-            if (stderr) reject(stderr);
-            resolve(stdout.toLowerCase().indexOf(query.toLowerCase()) > -1);
-        });
-    });
-};
+const userprofile = process.env.USERPROFILE;
 
-const sendEmailAlert = async () => {
-    return new Promise(function(resolve, reject) {
-        let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.GMAIL_EMAIL,
-                pass: process.env.GMAIL_PASSWORD,
-            },
-        });
-        let mailOptions = {
-            from: process.env.GMAIL_EMAIL,
-            to: 'agordon@hutsoninc.com',
-            subject: 'HubSpot Import Server Error',
-            html: 'Excel process needs to be started.',
-        };
-        transporter.sendMail(mailOptions, function(err, info) {
-            if (err) reject(err);
-            resolve(info);
-        });
-    });
-};
+const main = async options => {
+    options = Object.assign(defaultOptions, options);
 
-const run = async options => {
-    options = Object.assign(
-        {
-            customers: {
-                input: path.join(__dirname, '../data/customers.csv'), // Data from query
-                previousImport: path.join(
-                    __dirname,
-                    '../data/customers-out.json'
-                ), // Previous import data
-            },
-            deals: {
-                input: path.join(__dirname, '../data/deals.csv'), // Data from query
-                previousImport: path.join(__dirname, '../data/deals-out.json'), // Previous import data
-            },
-            parts: {
-                input: path.join(__dirname, '../data/parts.csv'), // Data from query
-                previousImport: path.join(__dirname, '../data/parts-out.json'), // Previous import data
-            },
-            upload: true, // Should the new data be uploaded to HubSpot
-            limit: 5, // Number of concurrent executions
-        },
-        options
-    );
-
-    console.log('Checking for excel process...');
-    let running = await isRunning('wfica32.exe').catch(err => {
-        console.log(err);
-        process.exit(1);
-    });
-
-    if (!running) {
-        console.log('Excel process is not running.');
-        console.log('Sending email alert...');
-        await sendEmailAlert()
-            .then(() => {
-                console.log('Sent email alert');
-                process.exit(0);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-        process.exit(0);
-    }
-
-    console.log('Excel process is running.');
-    const userprofile = process.env.USERPROFILE;
+    // await checkProcess();
 
     // Copy current excel files
     console.log('Copying excel files from query...');
@@ -465,7 +391,7 @@ const run = async options => {
     );
 };
 
-run()
+main()
     .then(() => {
         console.log('Finished!');
         process.exit(0);

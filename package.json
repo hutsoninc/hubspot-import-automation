@@ -29,6 +29,6 @@
     "nodemailer": "^4.7.0"
   },
   "devDependencies": {
-    "json2csv": "^4.3.2"
+    "json2csv": "^4.5.4"
   }
 }
